@@ -1,10 +1,12 @@
 import React from 'react';
-
+import Timer from './Timer';
+import {clearInterval} from 'timers';
 
 const SUCCESS = 'SUCCESS';
 const FAILURE ='FAILURE';
 const WAITING ='WAITING';
 const IDLE ='IDLE';
+
 
 function makeFakeRequest(){
   return new Promise((resolve, reject)=> {
@@ -105,18 +107,29 @@ function countWords(text){
   return text ? text.match(/\w+/g).length : 0
 }
 
-class WordCounter extends React.Component {
+export default class WordCounter extends React.Component {
   constructor(){
     super();
-    this.state = {text: ''};
-    this.handleTextChange = this.handleTextChange.bind(this);
+    // this.state = {text: ''};
+    // this.handleTextChange = this.handleTextChange.bind(this);
+    //
+
+    this.state = {text:'',timeNow:  new Date()}
   }
 
   handleTextChange(currentText){
-    // const obj = {text: currentText}
-    // const func = () => {obj}
-    // this.setState(fun);
     this.setState(() => { return {text: currentText}})
+    this.timer = null;
+  }
+
+  componentDidMount(){
+this.timer = setInterval(()=>{
+this.setState({ timeNow: new Date()})
+},1000);
+  }
+
+  componentWillUnmount(){
+clearInterval(this.timer)
   }
 
   render() {
@@ -124,12 +137,14 @@ class WordCounter extends React.Component {
     const{ text } = this.state;
     const wordCount = countWords(text);
     const progress = wordCount / targetWordCount;
+    const timeNow = new Date;
     return (
       <form className="measure pa4 sans-serif">
       <Editor text={text} onTextChange={this.handleTextChange}/>
       <Counter count={wordCount}/>
       <ProguressBar completion={progress}/>
       <SaveManeger saveFunction={makeFakeRequest} data={this.state}/>
+      <Timer timeNow={timeNow}/>
       </form>
     )
   }
@@ -151,5 +166,4 @@ function WordCounter({text,targetWordCount}){
 
 
 
-export default WordCounter;
- 
+
